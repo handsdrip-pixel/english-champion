@@ -10,12 +10,6 @@ export default function RoomPage({ params }: { params: Promise<{ pin: string }> 
   const router = useRouter();
   const [room, setRoom] = useState<Room | null>(null);
   const [participants, setParticipants] = useState<Record<string, Participant>>({});
-  const [copied, setCopied] = useState(false);
-  const [joinUrl, setJoinUrl] = useState("");
-
-  useEffect(() => {
-    setJoinUrl(`${window.location.origin}/learner/quiz/${pin}`);
-  }, [pin]);
 
   useEffect(() => {
     const roomRef = doc(db, "rooms", pin);
@@ -28,12 +22,6 @@ export default function RoomPage({ params }: { params: Promise<{ pin: string }> 
     });
     return () => unsub();
   }, [pin]);
-
-  const copyLink = () => {
-    navigator.clipboard.writeText(joinUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const finishQuiz = async () => {
     await updateDoc(doc(db, "rooms", pin), { status: "finished" });
@@ -66,19 +54,12 @@ export default function RoomPage({ params }: { params: Promise<{ pin: string }> 
         </span>
       </div>
 
-      {/* 입장 링크 */}
-      <div className="bg-white rounded-2xl p-6 shadow-md mb-4">
-        <p className="text-sm font-bold text-gray-500 mb-3">🔗 학생 입장 링크 — 아래 링크를 공유하세요</p>
-        <div
-          className="flex items-center gap-3 p-4 rounded-xl cursor-pointer hover:opacity-90 transition"
-          style={{ background: "linear-gradient(135deg, var(--primary), #9B8FFF)" }}
-          onClick={copyLink}
-        >
-          <span className="text-white text-sm font-mono flex-1 truncate">{joinUrl}</span>
-          <span className="text-white text-xl shrink-0">{copied ? "✓" : "📋"}</span>
-        </div>
-        <p className="text-xs text-gray-400 mt-2 text-center">
-          {copied ? "✓ 클립보드에 복사됐습니다!" : "클릭하면 링크가 복사됩니다 · 카카오톡, 문자 등으로 공유하세요"}
+      {/* 학습자 안내 */}
+      <div className="rounded-2xl p-4 mb-4 flex items-center gap-3" style={{ background: "linear-gradient(135deg, #EEF2FF, #FFF0F8)" }}>
+        <span className="text-2xl">💡</span>
+        <p className="text-sm text-gray-600">
+          학생들이 <span className="font-bold" style={{ color: "var(--primary)" }}>영어챔피언</span> 사이트에서
+          <span className="font-bold" style={{ color: "var(--secondary)" }}> 학습자 버튼</span>을 클릭하면 이 퀴즈에 자동으로 입장합니다.
         </p>
       </div>
 
