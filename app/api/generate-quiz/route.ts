@@ -83,6 +83,7 @@ const jsonSchema = `{
 
 export async function POST(req: NextRequest) {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+  try {
 
   const body = await req.json();
   const { topic, count = 5, type = "multiple", grade = "elem_5_6", image, imageType } = body;
@@ -146,7 +147,7 @@ ${curriculum.label} 수준에 맞는 영어 퀴즈를 만들어주세요.`;
       systemInstruction: systemPrompt,
       responseMimeType: "application/json",
       temperature: 0.7,
-      maxOutputTokens: 3000,
+      maxOutputTokens: 8192,
     },
     contents,
   });
@@ -155,7 +156,17 @@ ${curriculum.label} 수준에 맞는 영어 퀴즈를 만들어주세요.`;
 
   // 혹시 ```json ... ``` 래핑이 있을 경우 제거
   const cleaned = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
-  const parsed = JSON.parse(cleaned);
+
+  let parsed: { title?: string; questions: QuizQuestion[] };
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch {
+    console.error("Gemini JSON parse error. Raw length:", cleaned.length, "| Preview:", cleaned.slice(-200));
+    return NextResponse.json(
+      { error: "AI 응답 파싱에 실패했습니다. 문항 수를 줄이거나 다시 시도해주세요." },
+      { status: 500 }
+    );
+  }
 
   const quizSet = {
     id: `quiz_${Date.now()}`,
@@ -171,7 +182,14 @@ ${curriculum.label} 수준에 맞는 영어 퀴즈를 만들어주세요.`;
     createdAt: Date.now(),
   };
 
-  return NextResponse.json(quizSet);
+    return NextResponse.json(quizSet);
+  } catch (err) {
+    console.error("generate-quiz error:", err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "퀴즈 생성에 실패했습니다. 다시 시도해주세요." },
+      { status: 500 }
+    );
+  }
 }
 
 interface QuizQuestion {
