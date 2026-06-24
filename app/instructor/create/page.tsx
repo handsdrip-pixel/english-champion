@@ -179,7 +179,7 @@ export default function CreateQuizPage() {
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => router.push("/")} className="text-gray-400 hover:text-gray-600 text-2xl">←</button>
         <h1 className="text-2xl font-black" style={{ color: "var(--primary)" }}>✨ 퀴즈 만들기</h1>
-        <span className="ml-auto text-sm text-gray-400">👋 {instructor.nickname}</span>
+        <span className="ml-auto text-sm text-gray-400">👋 선생님</span>
       </div>
 
       {/* 입력 방식 토글 */}

@@ -365,8 +365,24 @@ export default function LearnerQuizPage({ params }: { params: Promise<{ pin: str
             <p className="text-gray-600">정답: <span className="font-bold">{currentQ.answer}</span></p>
             <SpeakButton text={currentQ.answer} size="sm" />
           </div>
-          <p className="text-gray-400 text-sm mt-2">{currentQ.explanation}</p>
-          {isCorrect && <p className="text-green-500 font-bold mt-2">+{100}점 획득!</p>}
+          {isCorrect && <p className="text-green-500 font-bold mt-2">+100점 획득! 🎊</p>}
+          {!isCorrect && (
+            <div className="mt-3 text-left space-y-2">
+              <div className="rounded-xl p-3 text-sm" style={{ background: "#FFF8E7" }}>
+                <p className="font-bold text-orange-600 mb-1">📖 해설</p>
+                <p className="text-gray-700">{currentQ.explanation}</p>
+              </div>
+              {currentQ.example && (
+                <div className="rounded-xl p-3 text-sm" style={{ background: "#F0F4FF" }}>
+                  <p className="font-bold mb-1" style={{ color: "var(--primary)" }}>💬 예시 문장</p>
+                  <div className="flex items-start gap-2">
+                    <p className="text-gray-700 flex-1">{currentQ.example}</p>
+                    <SpeakButton text={currentQ.example.split("→")[0].trim()} size="sm" />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
           <button
             onClick={goNextQuestion}
             className="mt-4 w-full py-3 rounded-xl text-white font-bold text-lg"

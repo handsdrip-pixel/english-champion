@@ -59,7 +59,7 @@ export default function RoomPage({ params }: { params: Promise<{ pin: string }> 
         <span className="text-2xl">💡</span>
         <p className="text-sm text-gray-600">
           학생들이 <span className="font-bold" style={{ color: "var(--primary)" }}>영어챔피언</span> 사이트에서
-          <span className="font-bold" style={{ color: "var(--secondary)" }}> 학습자 버튼</span>을 클릭하면 이 퀴즈에 자동으로 입장합니다.
+          <span className="font-bold" style={{ color: "var(--secondary)" }}> 학생 버튼</span>을 클릭하면 이 퀴즈에 자동으로 입장합니다.
         </p>
       </div>
 

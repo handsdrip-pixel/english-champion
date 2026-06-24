@@ -7,6 +7,7 @@ export interface QuizQuestion {
   options?: string[];       // for multiple choice
   answer: string;
   explanation: string;
+  example?: string;
   hint?: string;            // for spelling type
 }
 

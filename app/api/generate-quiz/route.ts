@@ -74,7 +74,8 @@ const jsonSchema = `{
       "question": "문제 텍스트",
       "options": ["선택지1", "선택지2", "선택지3", "선택지4"],
       "answer": "정답",
-      "explanation": "해설",
+      "explanation": "핵심 해설 (1~2문장, 한국어)",
+      "example": "정답을 활용한 예시 문장 (영어 문장 + 한국어 해석, 예: 'I went to school. → 나는 학교에 갔다.')",
       "hint": "힌트(spelling 타입만)"
     }
   ]
@@ -180,5 +181,6 @@ interface QuizQuestion {
   options?: string[];
   answer: string;
   explanation: string;
+  example?: string;
   hint?: string;
 }

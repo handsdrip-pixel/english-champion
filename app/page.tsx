@@ -65,7 +65,7 @@ export default function HomePage() {
             style={{ background: "linear-gradient(135deg, var(--primary), #9B8FFF)" }}
           >
             <div className="text-4xl mb-2">👩‍🏫</div>
-            <div>교수자</div>
+            <div>선생님</div>
             <div className="text-sm font-normal mt-1 opacity-80">퀴즈 만들기</div>
           </button>
 
@@ -76,7 +76,7 @@ export default function HomePage() {
             style={{ background: "linear-gradient(135deg, var(--secondary), #FF9EC4)" }}
           >
             <div className="text-4xl mb-2">{learnerLoading ? "⏳" : "🧒"}</div>
-            <div>학습자</div>
+            <div>학생</div>
             <div className="text-sm font-normal mt-1 opacity-80">
               {learnerLoading ? "퀴즈 찾는 중..." : "퀴즈 참여하기"}
             </div>
@@ -94,7 +94,7 @@ export default function HomePage() {
       {showInstructorForm && (
         <div className="bg-white rounded-3xl p-8 shadow-xl w-full max-w-sm animate-bounce-in">
           <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: "var(--primary)" }}>
-            👩‍🏫 교수자 입장
+            👩‍🏫 선생님 입장
           </h2>
           <div className="space-y-4">
             <input
