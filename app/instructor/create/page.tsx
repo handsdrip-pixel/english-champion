@@ -157,6 +157,8 @@ export default function CreateQuizPage() {
         participants: {},
         createdAt: Date.now(),
       });
+      // 현재 활성 방 등록 → 학습자가 자동으로 찾아옴
+      await setDoc(doc(db, "config", "activeRoom"), { pin, createdAt: Date.now() });
       router.push(`/instructor/room/${pin}`);
     } catch (e) {
       console.error(e);

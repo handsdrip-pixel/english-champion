@@ -2,7 +2,7 @@
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { db } from "@/lib/firebase";
-import { doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { doc, onSnapshot, updateDoc, deleteDoc } from "firebase/firestore";
 import { Room, Participant } from "@/types/quiz";
 
 export default function RoomPage({ params }: { params: Promise<{ pin: string }> }) {
@@ -35,8 +35,10 @@ export default function RoomPage({ params }: { params: Promise<{ pin: string }> 
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const finishQuiz = () => {
-    updateDoc(doc(db, "rooms", pin), { status: "finished" });
+  const finishQuiz = async () => {
+    await updateDoc(doc(db, "rooms", pin), { status: "finished" });
+    // 활성 방 해제 → 새 학습자가 접속 못하도록
+    await deleteDoc(doc(db, "config", "activeRoom"));
   };
 
   if (!room) {

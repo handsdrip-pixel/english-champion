@@ -1,15 +1,15 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function HomePage() {
   const router = useRouter();
   const [showInstructorForm, setShowInstructorForm] = useState(false);
-  const [showLearnerForm, setShowLearnerForm] = useState(false);
   const [password, setPassword] = useState("");
-  const [learnerNick, setLearnerNick] = useState("");
-  const [pin, setPin] = useState("");
   const [error, setError] = useState("");
+  const [learnerLoading, setLearnerLoading] = useState(false);
 
   const INSTRUCTOR_PASSWORD = "1924";
 
@@ -22,13 +22,28 @@ export default function HomePage() {
     router.push("/instructor/create");
   };
 
-  const handleLearnerEnter = () => {
-    if (!learnerNick.trim() || pin.length < 6) {
-      setError("닉네임과 6자리 PIN을 입력해주세요.");
-      return;
+  const handleLearnerEnter = async () => {
+    setLearnerLoading(true);
+    setError("");
+    try {
+      const snap = await getDoc(doc(db, "config", "activeRoom"));
+      if (!snap.exists()) {
+        setError("현재 진행 중인 퀴즈가 없어요. 선생님께 문의하세요.");
+        return;
+      }
+      const { pin } = snap.data();
+      // 방 상태 확인
+      const roomSnap = await getDoc(doc(db, "rooms", pin));
+      if (!roomSnap.exists() || roomSnap.data().status === "finished") {
+        setError("퀴즈가 아직 준비 중이거나 이미 종료됐어요. 선생님께 문의하세요.");
+        return;
+      }
+      router.push(`/learner/quiz/${pin}`);
+    } catch {
+      setError("연결에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setLearnerLoading(false);
     }
-    localStorage.setItem("learner", JSON.stringify({ nickname: learnerNick }));
-    router.push(`/learner/quiz/${pin.toUpperCase()}`);
   };
 
   return (
@@ -42,10 +57,10 @@ export default function HomePage() {
         <p className="text-gray-500 mt-2 text-lg">AI 영어 퀴즈 플랫폼</p>
       </div>
 
-      {!showInstructorForm && !showLearnerForm && (
+      {!showInstructorForm && (
         <div className="flex flex-col sm:flex-row gap-5 w-full max-w-md animate-slide-up">
           <button
-            onClick={() => { setShowInstructorForm(true); setShowLearnerForm(false); setError(""); }}
+            onClick={() => { setShowInstructorForm(true); setError(""); }}
             className="flex-1 rounded-3xl p-8 text-white font-bold text-xl shadow-lg hover:scale-105 transition-transform"
             style={{ background: "linear-gradient(135deg, var(--primary), #9B8FFF)" }}
           >
@@ -53,15 +68,25 @@ export default function HomePage() {
             <div>교수자</div>
             <div className="text-sm font-normal mt-1 opacity-80">퀴즈 만들기</div>
           </button>
+
           <button
-            onClick={() => { setShowLearnerForm(true); setShowInstructorForm(false); setError(""); }}
-            className="flex-1 rounded-3xl p-8 text-white font-bold text-xl shadow-lg hover:scale-105 transition-transform"
+            onClick={handleLearnerEnter}
+            disabled={learnerLoading}
+            className="flex-1 rounded-3xl p-8 text-white font-bold text-xl shadow-lg hover:scale-105 transition-transform disabled:opacity-70 disabled:scale-100"
             style={{ background: "linear-gradient(135deg, var(--secondary), #FF9EC4)" }}
           >
-            <div className="text-4xl mb-2">🧒</div>
+            <div className="text-4xl mb-2">{learnerLoading ? "⏳" : "🧒"}</div>
             <div>학습자</div>
-            <div className="text-sm font-normal mt-1 opacity-80">퀴즈 참여하기</div>
+            <div className="text-sm font-normal mt-1 opacity-80">
+              {learnerLoading ? "퀴즈 찾는 중..." : "퀴즈 참여하기"}
+            </div>
           </button>
+        </div>
+      )}
+
+      {error && !showInstructorForm && (
+        <div className="mt-4 px-5 py-3 rounded-2xl text-center animate-slide-up" style={{ background: "#FFF0F0" }}>
+          <p className="text-red-500 text-sm font-medium">{error}</p>
         </div>
       )}
 
@@ -90,47 +115,7 @@ export default function HomePage() {
             >
               시작하기 →
             </button>
-            <button onClick={() => setShowInstructorForm(false)} className="w-full text-gray-400 text-sm">
-              ← 돌아가기
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Learner Form */}
-      {showLearnerForm && (
-        <div className="bg-white rounded-3xl p-8 shadow-xl w-full max-w-sm animate-bounce-in">
-          <h2 className="text-2xl font-bold mb-6 text-center" style={{ color: "var(--secondary)" }}>
-            🧒 학습자 입장
-          </h2>
-          <div className="space-y-4">
-            <input
-              type="text"
-              placeholder="닉네임 (예: 홍길동)"
-              value={learnerNick}
-              onChange={(e) => setLearnerNick(e.target.value)}
-              className="w-full border-2 rounded-xl p-3 text-lg focus:outline-none"
-              style={{ borderColor: "#FFE0EE" }}
-            />
-            <input
-              type="text"
-              placeholder="6자리 PIN 코드"
-              value={pin}
-              onChange={(e) => setPin(e.target.value.toUpperCase().slice(0, 6))}
-              onKeyDown={(e) => e.key === "Enter" && handleLearnerEnter()}
-              className="w-full border-2 rounded-xl p-3 text-lg text-center tracking-widest font-mono font-bold focus:outline-none"
-              style={{ borderColor: "#FFE0EE" }}
-              maxLength={6}
-            />
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-            <button
-              onClick={handleLearnerEnter}
-              className="w-full py-3 rounded-xl text-white font-bold text-lg hover:opacity-90 transition"
-              style={{ background: "var(--secondary)" }}
-            >
-              입장하기 →
-            </button>
-            <button onClick={() => setShowLearnerForm(false)} className="w-full text-gray-400 text-sm">
+            <button onClick={() => { setShowInstructorForm(false); setError(""); }} className="w-full text-gray-400 text-sm">
               ← 돌아가기
             </button>
           </div>
