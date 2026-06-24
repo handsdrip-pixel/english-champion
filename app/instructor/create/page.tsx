@@ -40,7 +40,6 @@ export default function CreateQuizPage() {
   const [quiz, setQuiz] = useState<QuizSet | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [timerSeconds, setTimerSeconds] = useState(30);
-  const [mode, setMode] = useState<"teacher" | "self">("teacher");
   const [creatingRoom, setCreatingRoom] = useState(false);
 
   // 이미지 관련
@@ -152,7 +151,7 @@ export default function CreateQuizPage() {
         quiz,
         status: "playing",
         currentQuestion: 0,
-        mode,
+        mode: "self",
         timerSeconds,
         instructorName: instructor.nickname || "선생님",
         participants: {},
@@ -478,42 +477,20 @@ export default function CreateQuizPage() {
 
           {/* Room Settings */}
           <div className="bg-white rounded-2xl p-6 shadow-md mb-6">
-            <h3 className="font-bold text-gray-700 mb-4">🎲 방 설정</h3>
-            <div className="flex gap-4 flex-wrap">
-              <div>
-                <label className="block text-sm text-gray-500 mb-1">진행 방식</label>
-                <div className="flex gap-2">
-                  {[{ v: "teacher" as const, l: "교사 주도" }, { v: "self" as const, l: "자기 주도" }].map(({ v, l }) => (
-                    <button
-                      key={v}
-                      onClick={() => setMode(v)}
-                      className={`px-4 py-2 rounded-xl font-bold border-2 transition text-sm ${
-                        mode === v ? "text-white border-transparent" : "text-gray-500 border-gray-200"
-                      }`}
-                      style={mode === v ? { background: "var(--primary)" } : {}}
-                    >
-                      {l}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm text-gray-500 mb-1">문제당 시간</label>
-                <div className="flex gap-2">
-                  {[20, 30, 60].map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => setTimerSeconds(t)}
-                      className={`px-4 py-2 rounded-xl font-bold border-2 transition text-sm ${
-                        timerSeconds === t ? "text-white border-transparent" : "text-gray-500 border-gray-200"
-                      }`}
-                      style={timerSeconds === t ? { background: "var(--accent)", color: "#333" } : {}}
-                    >
-                      {t}초
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <h3 className="font-bold text-gray-700 mb-4">⏱️ 문제당 제한 시간</h3>
+            <div className="flex gap-2">
+              {[20, 30, 60].map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTimerSeconds(t)}
+                  className={`px-5 py-2 rounded-xl font-bold border-2 transition text-sm ${
+                    timerSeconds === t ? "text-white border-transparent" : "text-gray-500 border-gray-200"
+                  }`}
+                  style={timerSeconds === t ? { background: "var(--accent)", color: "#333" } : {}}
+                >
+                  {t}초
+                </button>
+              ))}
             </div>
           </div>
 

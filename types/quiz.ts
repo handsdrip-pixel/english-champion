@@ -23,6 +23,7 @@ export interface QuizSet {
 export interface Room {
   pin: string;
   quiz: QuizSet;
+  gradeLabel?: string;
   status: "waiting" | "playing" | "finished";
   currentQuestion: number;
   mode: "teacher" | "self";
