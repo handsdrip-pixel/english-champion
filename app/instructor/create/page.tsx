@@ -218,8 +218,8 @@ export default function CreateQuizPage() {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && generateQuiz()}
-                className="w-full border-2 rounded-xl p-3 text-lg focus:outline-none focus:border-purple-400"
-                style={{ borderColor: "#E0DBFF" }}
+                className="w-full border-2 rounded-xl p-3 text-lg focus:outline-none focus:border-amber-400"
+                style={{ borderColor: "#FDE68A" }}
               />
             </div>
           )}
@@ -238,7 +238,7 @@ export default function CreateQuizPage() {
                   onDragLeave={() => setIsDragging(false)}
                   onClick={() => fileInputRef.current?.click()}
                   className={`border-3 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${
-                    isDragging ? "border-pink-400 bg-pink-50 scale-[1.02]" : "border-gray-200 hover:border-pink-300 hover:bg-pink-50"
+                    isDragging ? "border-amber-400 bg-amber-50 scale-[1.02]" : "border-gray-200 hover:border-amber-300 hover:bg-amber-50"
                   }`}
                   style={{ borderWidth: "3px" }}
                 >
@@ -259,7 +259,7 @@ export default function CreateQuizPage() {
                   <img
                     src={imagePreview}
                     alt="업로드된 교재"
-                    className="w-full max-h-72 object-contain rounded-xl border-2 border-pink-200 bg-gray-50"
+                    className="w-full max-h-72 object-contain rounded-xl border-2 border-amber-200 bg-gray-50"
                   />
                   <button
                     onClick={clearImage}

@@ -62,7 +62,7 @@ export default function HomePage() {
           <button
             onClick={() => { setShowInstructorForm(true); setError(""); }}
             className="flex-1 rounded-3xl p-8 text-white font-bold text-xl shadow-lg hover:scale-105 transition-transform"
-            style={{ background: "linear-gradient(135deg, var(--primary), #9B8FFF)" }}
+            style={{ background: "linear-gradient(135deg, var(--primary), #F59E0B)" }}
           >
             <div className="text-4xl mb-2">👩‍🏫</div>
             <div>선생님</div>
@@ -73,7 +73,7 @@ export default function HomePage() {
             onClick={handleLearnerEnter}
             disabled={learnerLoading}
             className="flex-1 rounded-3xl p-8 text-white font-bold text-xl shadow-lg hover:scale-105 transition-transform disabled:opacity-70 disabled:scale-100"
-            style={{ background: "linear-gradient(135deg, var(--secondary), #FF9EC4)" }}
+            style={{ background: "linear-gradient(135deg, var(--secondary), #A78BFA)" }}
           >
             <div className="text-4xl mb-2">{learnerLoading ? "⏳" : "🧒"}</div>
             <div>학생</div>
@@ -85,7 +85,7 @@ export default function HomePage() {
       )}
 
       {error && !showInstructorForm && (
-        <div className="mt-4 px-5 py-3 rounded-2xl text-center animate-slide-up" style={{ background: "#FFF0F0" }}>
+        <div className="mt-4 px-5 py-3 rounded-2xl text-center animate-slide-up" style={{ background: "#FEF3C7" }}>
           <p className="text-red-500 text-sm font-medium">{error}</p>
         </div>
       )}
@@ -103,8 +103,8 @@ export default function HomePage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleInstructorEnter()}
-              className="w-full border-2 rounded-xl p-3 text-lg text-center tracking-widest font-mono font-bold focus:outline-none focus:border-purple-400"
-              style={{ borderColor: "#E0DBFF" }}
+              className="w-full border-2 rounded-xl p-3 text-lg text-center tracking-widest font-mono font-bold focus:outline-none focus:border-amber-400"
+              style={{ borderColor: "#FDE68A" }}
               autoFocus
             />
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}

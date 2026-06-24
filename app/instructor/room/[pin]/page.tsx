@@ -55,7 +55,7 @@ export default function RoomPage({ params }: { params: Promise<{ pin: string }> 
       </div>
 
       {/* 학습자 안내 */}
-      <div className="rounded-2xl p-4 mb-4 flex items-center gap-3" style={{ background: "linear-gradient(135deg, #EEF2FF, #FFF0F8)" }}>
+      <div className="rounded-2xl p-4 mb-4 flex items-center gap-3" style={{ background: "#FEF3C7" }}>
         <span className="text-2xl">💡</span>
         <p className="text-sm text-gray-600">
           학생들이 <span className="font-bold" style={{ color: "var(--primary)" }}>영어챔피언</span> 사이트에서
@@ -73,7 +73,7 @@ export default function RoomPage({ params }: { params: Promise<{ pin: string }> 
               <span className="text-sm text-gray-400">{room.quiz?.questions?.length}문제</span>
             </div>
             <div className="grid grid-cols-2 gap-3 text-center">
-              <div className="bg-purple-50 rounded-xl p-3">
+              <div className="bg-amber-50 rounded-xl p-3">
                 <p className="text-2xl font-black" style={{ color: "var(--primary)" }}>{participantList.length}</p>
                 <p className="text-xs text-gray-500 mt-0.5">참여자</p>
               </div>
