@@ -6,18 +6,19 @@ export default function HomePage() {
   const router = useRouter();
   const [showInstructorForm, setShowInstructorForm] = useState(false);
   const [showLearnerForm, setShowLearnerForm] = useState(false);
-  const [nickname, setNickname] = useState("");
   const [password, setPassword] = useState("");
   const [learnerNick, setLearnerNick] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
 
+  const INSTRUCTOR_PASSWORD = "1924";
+
   const handleInstructorEnter = () => {
-    if (!nickname.trim() || !password.trim()) {
-      setError("닉네임과 비밀번호를 입력해주세요.");
+    if (password !== INSTRUCTOR_PASSWORD) {
+      setError("비밀번호가 틀렸습니다.");
       return;
     }
-    localStorage.setItem("instructor", JSON.stringify({ nickname, password }));
+    localStorage.setItem("instructor", JSON.stringify({ nickname: "선생님" }));
     router.push("/instructor/create");
   };
 
@@ -72,21 +73,14 @@ export default function HomePage() {
           </h2>
           <div className="space-y-4">
             <input
-              type="text"
-              placeholder="닉네임 (예: 김선생님)"
-              value={nickname}
-              onChange={(e) => setNickname(e.target.value)}
-              className="w-full border-2 rounded-xl p-3 text-lg focus:outline-none focus:border-purple-400"
-              style={{ borderColor: "#E0DBFF" }}
-            />
-            <input
               type="password"
-              placeholder="세션 비밀번호"
+              placeholder="비밀번호 입력"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleInstructorEnter()}
-              className="w-full border-2 rounded-xl p-3 text-lg focus:outline-none focus:border-purple-400"
+              className="w-full border-2 rounded-xl p-3 text-lg text-center tracking-widest font-mono font-bold focus:outline-none focus:border-purple-400"
               style={{ borderColor: "#E0DBFF" }}
+              autoFocus
             />
             {error && <p className="text-red-500 text-sm text-center">{error}</p>}
             <button
