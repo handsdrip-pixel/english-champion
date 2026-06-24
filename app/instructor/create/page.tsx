@@ -33,7 +33,7 @@ export default function CreateQuizPage() {
   const router = useRouter();
   const [inputMode, setInputMode] = useState<InputMode>("text");
   const [topic, setTopic] = useState("");
-  const [count, setCount] = useState(5);
+  const [count, setCount] = useState(10);
   const [type, setType] = useState<QuestionTypeOption>("multiple");
   const [grade, setGrade] = useState<GradeLevel>("elem_5_6");
   const [loading, setLoading] = useState(false);
@@ -317,7 +317,7 @@ export default function CreateQuizPage() {
             <div>
               <label className="block text-sm font-bold text-gray-600 mb-1">📝 문항 수</label>
               <div className="flex gap-2">
-                {[5, 10, 15].map((n) => (
+                {[10, 30, 50].map((n) => (
                   <button
                     key={n}
                     onClick={() => setCount(n)}
