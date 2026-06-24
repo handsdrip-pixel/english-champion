@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// 빌드 타임이 아닌 런타임에만 호출되도록 dynamic 설정
+export const dynamic = "force-dynamic";
 
 const typeInstructions: Record<string, string> = {
   multiple: `4지선다 객관식. "options": ["A", "B", "C", "D"] 배열에 4개의 선택지를 포함하고, "answer"는 정답 텍스트.`,
@@ -107,6 +108,7 @@ const jsonSchema = `{
 }`;
 
 export async function POST(req: NextRequest) {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const body = await req.json();
   const { topic, count = 5, type = "multiple", grade = "elem_5_6", image, imageType } = body;
 
