@@ -141,18 +141,42 @@ ${curriculum.label} 수준에 맞는 영어 퀴즈를 만들어주세요.`;
     ];
   }
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    config: {
-      systemInstruction: systemPrompt,
-      responseMimeType: "application/json",
-      temperature: 0.7,
-      maxOutputTokens: 8192,
-    },
-    contents,
-  });
+  // 2.5-flash 우선, 503 시 2.0-flash로 fallback + 최대 2회 재시도
+  const MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-  const rawText = response.text ?? "";
+  let rawText = "";
+  let lastErr: unknown;
+
+  outer: for (const model of MODELS) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await ai.models.generateContent({
+          model,
+          config: {
+            systemInstruction: systemPrompt,
+            responseMimeType: "application/json",
+            temperature: 0.7,
+            maxOutputTokens: 8192,
+          },
+          contents,
+        });
+        rawText = res.text ?? "";
+        break outer;
+      } catch (err) {
+        lastErr = err;
+        const msg = err instanceof Error ? err.message : String(err);
+        // 503(과부하) / 429(rate limit)이면 재시도, 그 외 즉시 실패
+        if (msg.includes("503") || msg.includes("429") || msg.includes("UNAVAILABLE") || msg.includes("RESOURCE_EXHAUSTED")) {
+          if (attempt === 0) await sleep(1500); // 1.5초 뒤 재시도
+          continue;
+        }
+        throw err; // 다른 오류는 즉시 throw
+      }
+    }
+  }
+
+  if (!rawText) throw lastErr;
 
   // 혹시 ```json ... ``` 래핑이 있을 경우 제거
   const cleaned = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
