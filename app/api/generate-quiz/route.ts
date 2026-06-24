@@ -81,6 +81,16 @@ const jsonSchema = `{
   ]
 }`;
 
+const isRetryable = (err: unknown) => {
+  const msg = err instanceof Error ? err.message : String(err);
+  return (
+    msg.includes("503") ||
+    msg.includes("429") ||
+    msg.includes("UNAVAILABLE") ||
+    msg.includes("RESOURCE_EXHAUSTED")
+  );
+};
+
 export async function POST(req: NextRequest) {
   const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   try {
@@ -142,10 +152,6 @@ ${curriculum.label} 수준에 맞는 영어 퀴즈를 만들어주세요.`;
   }
 
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-  const isRetryable = (err: unknown) => {
-    const msg = err instanceof Error ? err.message : String(err);
-    return msg.includes("503") || msg.includes("429") || msg.includes("UNAVAILABLE") || msg.includes("RESOURCE_EXHAUSTED");
-  };
 
   const callModel = async (model: string) => {
     const res = await ai.models.generateContent({
@@ -154,23 +160,44 @@ ${curriculum.label} 수준에 맞는 영어 퀴즈를 만들어주세요.`;
         systemInstruction: systemPrompt,
         responseMimeType: "application/json",
         temperature: 0.7,
-        maxOutputTokens: 32768, // 50문제까지 대응
+        maxOutputTokens: 32768,
       },
       contents,
     });
     return res.text ?? "";
   };
 
+  // 재시도 전략: 각 모델당 최대 3회, 딜레이 1s → 2s → 3s
+  // 메인(gemini-2.5-flash) 전부 실패 시 백업(gemini-2.5-flash-lite)으로 전환
+  const PLAN: Array<{ model: string; delays: number[] }> = [
+    { model: "gemini-2.5-flash",      delays: [1000, 2000, 3000] },
+    { model: "gemini-2.5-flash-lite", delays: [1000, 2000, 3000] },
+  ];
+
   let rawText = "";
 
-  try {
-    rawText = await callModel("gemini-2.5-flash");
-  } catch (primaryErr) {
-    if (!isRetryable(primaryErr)) throw primaryErr;
-    // 과부하·레이트리밋 → 1.5초 대기 후 gemini-2.5-flash-lite 로 fallback
-    console.warn("gemini-2.5-flash unavailable, falling back to gemini-2.5-flash-lite");
-    await sleep(1500);
-    rawText = await callModel("gemini-2.5-flash-lite"); // fallback
+  outer: for (const { model, delays } of PLAN) {
+    for (let i = 0; i <= delays.length; i++) {
+      try {
+        rawText = await callModel(model);
+        break outer; // 성공 시 즉시 탈출
+      } catch (err) {
+        if (!isRetryable(err)) throw err; // 재시도 불가 오류는 즉시 throw
+        if (i < delays.length) {
+          console.warn(`${model} attempt ${i + 1} failed, retrying in ${delays[i]}ms...`);
+          await sleep(delays[i]);
+        } else {
+          console.warn(`${model} all attempts failed, switching to next model...`);
+        }
+      }
+    }
+  }
+
+  if (!rawText) {
+    return NextResponse.json(
+      { error: "AI 서버가 일시적으로 혼잡합니다. 잠시 후 다시 시도해주세요." },
+      { status: 503 }
+    );
   }
 
   // 혹시 ```json ... ``` 래핑이 있을 경우 제거
@@ -204,10 +231,13 @@ ${curriculum.label} 수준에 맞는 영어 퀴즈를 만들어주세요.`;
     return NextResponse.json(quizSet);
   } catch (err) {
     console.error("generate-quiz error:", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "퀴즈 생성에 실패했습니다. 다시 시도해주세요." },
-      { status: 500 }
-    );
+    const msg = err instanceof Error ? err.message : String(err);
+    const userMsg = isRetryable(err)
+      ? "AI 서버가 일시적으로 혼잡합니다. 잠시 후 다시 시도해주세요."
+      : msg.includes("API_KEY") || msg.includes("invalid") || msg.includes("403")
+      ? "API 키 설정을 확인해주세요."
+      : "퀴즈 생성에 실패했습니다. 다시 시도해주세요.";
+    return NextResponse.json({ error: userMsg }, { status: 500 });
   }
 }
 
