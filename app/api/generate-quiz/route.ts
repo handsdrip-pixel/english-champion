@@ -140,7 +140,7 @@ ${curriculum.label} 수준에 맞는 영어 퀴즈를 만들어주세요.`;
   }
 
   const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash",
+    model: "gemini-2.5-flash",
     config: {
       systemInstruction: systemPrompt,
       responseMimeType: "application/json",
