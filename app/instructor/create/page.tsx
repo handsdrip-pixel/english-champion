@@ -1,9 +1,68 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { QuizSet, QuizQuestion } from "@/types/quiz";
 import { db } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
+
+// ── 로딩 메시지 목록 ──────────────────────────
+const TEXT_MESSAGES = [
+  { icon: "🤖", text: "AI가 열심히 문제를 출제하고 있어요!" },
+  { icon: "📚", text: "교육과정을 꼼꼼히 살펴보는 중이에요..." },
+  { icon: "✍️", text: "딱 맞는 난이도로 조율하는 중이에요..." },
+  { icon: "🔍", text: "정답과 해설을 검토하고 있어요..." },
+  { icon: "💡", text: "재미있는 예시 문장을 붙이는 중이에요..." },
+  { icon: "⏳", text: "AI 서버가 잠깐 바빠요, 금방 돼요!" },
+  { icon: "💪", text: "거의 다 됐어요! 조금만 더 기다려요..." },
+];
+const IMAGE_MESSAGES = [
+  { icon: "🔍", text: "교재 이미지를 분석하고 있어요!" },
+  { icon: "📖", text: "이미지 속 단어와 문법을 읽는 중이에요..." },
+  { icon: "✍️", text: "분석 내용으로 문제를 만드는 중이에요..." },
+  { icon: "🎯", text: "학년 수준에 맞게 조율하고 있어요..." },
+  { icon: "⏳", text: "AI 서버가 잠깐 바빠요, 금방 돼요!" },
+  { icon: "💪", text: "거의 다 됐어요! 조금만 더 기다려요..." },
+];
+
+function LoadingQuiz({ isImage }: { isImage: boolean }) {
+  const [msgIdx, setMsgIdx] = useState(0);
+  const messages = isImage ? IMAGE_MESSAGES : TEXT_MESSAGES;
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setMsgIdx((i) => Math.min(i + 1, messages.length - 1));
+    }, 4000);
+    return () => clearInterval(id);
+  }, [messages.length]);
+
+  const { icon, text } = messages[msgIdx];
+
+  return (
+    <div className="text-center py-10">
+      {/* 아이콘 */}
+      <div className="text-7xl mb-5 inline-block animate-ai-wobble">{icon}</div>
+
+      {/* 메시지 */}
+      <p
+        key={msgIdx}
+        className="font-bold text-lg mb-1 animate-slide-up"
+        style={{ color: "var(--primary)" }}
+      >
+        {text}
+      </p>
+      <p className="text-gray-400 text-sm mb-6">
+        {isImage ? "이미지 분석은 15~30초 걸릴 수 있어요" : "보통 10~20초 걸려요"}
+      </p>
+
+      {/* 통통 튀는 점 세 개 */}
+      <div className="flex justify-center gap-2">
+        <span className="dot-1 w-3 h-3 rounded-full inline-block" style={{ background: "var(--primary)" }} />
+        <span className="dot-2 w-3 h-3 rounded-full inline-block" style={{ background: "var(--secondary)" }} />
+        <span className="dot-3 w-3 h-3 rounded-full inline-block" style={{ background: "var(--accent)" }} />
+      </div>
+    </div>
+  );
+}
 
 type QuestionTypeOption = "multiple" | "ox" | "spelling" | "mixed";
 type InputMode = "text" | "image";
@@ -366,17 +425,7 @@ export default function CreateQuizPage() {
       </div>
 
       {/* Loading Animation */}
-      {loading && (
-        <div className="text-center py-10 animate-pulse">
-          <div className="text-6xl mb-4">{inputMode === "image" ? "🔍" : "🤖"}</div>
-          <p className="text-gray-500 font-bold">
-            {inputMode === "image" ? "교재 이미지를 분석하고 있어요..." : "AI가 퀴즈를 생성하고 있어요..."}
-          </p>
-          <p className="text-gray-400 text-sm mt-1">
-            {inputMode === "image" ? "이미지 분석은 10~20초 걸릴 수 있어요" : "보통 5~10초 걸려요"}
-          </p>
-        </div>
-      )}
+      {loading && <LoadingQuiz isImage={inputMode === "image"} />}
 
       {/* Quiz Preview & Edit */}
       {quiz && !loading && (
