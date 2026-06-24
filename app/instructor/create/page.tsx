@@ -502,7 +502,7 @@ export default function CreateQuizPage() {
             className="w-full py-4 rounded-xl text-white font-black text-xl disabled:opacity-50 hover:opacity-90 transition shadow-lg"
             style={{ background: "linear-gradient(135deg, var(--success), #4CAF50)" }}
           >
-            {creatingRoom ? "방 만드는 중..." : "🎉 방 만들고 PIN 발급하기!"}
+            {creatingRoom ? "방 만드는 중..." : "🎉 방 만들기"}
           </button>
         </div>
       )}
